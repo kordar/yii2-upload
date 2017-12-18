@@ -1,0 +1,21 @@
+{
+    "name": "upload/kordar-upload",
+    "description": "upload extension",
+    "type": "yii2-extension",
+    "keywords": ["yii2","extension"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "perpel",
+            "email": "572821520@qq.com"
+        }
+    ],
+    "require": {
+        "yiisoft/yii2": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "kordar\\upload\\": ""
+        }
+    }
+}
