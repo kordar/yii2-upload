@@ -19,7 +19,7 @@ class SingleUploadFile extends Action
 
     public $catgory = '';
 
-    public $autoSubDateRoot = false;    // 时间格式
+    public $autoSubDateRoot = '';    // 时间格式
 
     public function beforeRun()
     {
@@ -28,30 +28,29 @@ class SingleUploadFile extends Action
         return true;
     }
 
-    protected function getPath()
+    protected function getPath($filename)
     {
-        $path = $this->root . '/';
-
-        if (!empty($this->catgory)) {
-            $path .= $this->catgory . '/';
-        }
-
-        if ($this->autoSubDateRoot) {
-            $path .= date($this->autoSubDateRoot) . '/';
+        if (!empty($filename)) {
+            $path = dirname($filename);
+        } else {
+            if ($this->autoSubDateRoot) {
+                $this->autoSubDateRoot = date($this->autoSubDateRoot);
+            }
+            $path = UploadHelper::getPath([$this->root, $this->catgory, $this->autoSubDateRoot]);
         }
 
         if (!file_exists($path)) {
             UploadHelper::createDir($path);
         }
 
-        return $path;
+        return empty($filename) ? $path . $this->uniqid() . '.' . $this->model->file->extension : $filename;
     }
 
     protected function uniqid()
     {
-        if (function_exists('session_create_id')) {
+        /*if (function_exists('session_create_id')) {
             return session_create_id();
-        }
+        }*/
         return md5(uniqid(md5(microtime(true)),true));
     }
 
@@ -60,15 +59,10 @@ class SingleUploadFile extends Action
         if (\Yii::$app->request->isPost) {
             $this->model->file = UploadedFile::getInstance($this->model, 'file');
             if ($this->model->file && $this->model->validate()) {
-                $fileName = \Yii::$app->request->post('filename', '');
-                if (empty($fileName)) {
-                    $path = $this->getPath();
-                    $fileName = $path . $this->uniqid() . '.' . $this->model->file->extension;
-                } elseif (!file_exists($fileName)) {
-                    UploadHelper::createDir(dirname($fileName));
+                $fileName = $this->getPath(\Yii::$app->request->post('filename', ''));
+                if ($this->model->file->saveAs($fileName)) {
+                    return json_encode(['status' => 'success', 'path' => $fileName]);
                 }
-                $this->model->file->saveAs($fileName);
-                return json_encode(['status' => 'success', 'path' => $fileName]);
             } else {
                 $err = $this->model->getFirstErrors();
                 return json_encode(['status' => 'fail', 'msg' => $err['file']]);

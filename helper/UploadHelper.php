@@ -18,4 +18,10 @@ class UploadHelper
             }
         }
     }
+
+    public static function getPath($pathInfo = [])
+    {
+        return implode('/', array_filter($pathInfo));
+    }
+
 }
