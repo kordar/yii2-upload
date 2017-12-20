@@ -17,6 +17,8 @@ class SingleUploadFile extends Action
 
     public $root = 'uploads';
 
+    public $catgory = '';
+
     public $autoSubDateRoot = false;    // 时间格式
 
     public function beforeRun()
@@ -29,9 +31,19 @@ class SingleUploadFile extends Action
     protected function getPath()
     {
         $path = $this->root . '/';
+
+        if (!empty($this->catgory)) {
+            $path .= $this->catgory . '/';
+        }
+
         if ($this->autoSubDateRoot) {
             $path .= date($this->autoSubDateRoot) . '/';
         }
+
+        if (!file_exists($path)) {
+            UploadHelper::createDir($path);
+        }
+
         return $path;
     }
 
@@ -48,11 +60,13 @@ class SingleUploadFile extends Action
         if (\Yii::$app->request->isPost) {
             $this->model->file = UploadedFile::getInstance($this->model, 'file');
             if ($this->model->file && $this->model->validate()) {
-                $path = $this->getPath();
-                if (!file_exists($path)) {
-                    UploadHelper::createDir($path);
+                $fileName = \Yii::$app->request->post('filename', '');
+                if (empty($fileName)) {
+                    $path = $this->getPath();
+                    $fileName = $path . $this->uniqid() . '.' . $this->model->file->extension;
+                } elseif (!file_exists($fileName)) {
+                    UploadHelper::createDir(dirname($fileName));
                 }
-                $fileName = $path . $this->uniqid() . '.' . $this->model->file->extension;
                 $this->model->file->saveAs($fileName);
                 return json_encode(['status' => 'success', 'path' => $fileName]);
             } else {
@@ -60,7 +74,7 @@ class SingleUploadFile extends Action
                 return json_encode(['status' => 'fail', 'msg' => $err['file']]);
             }
         }
-        return json_encode(['status' => 'fail', 'msg' => 'Upload Fail']);
+        return json_encode(['status' => 'fail', 'msg' => \Yii::t('ace.upload', 'Upload Fail')]);
     }
 
 }
