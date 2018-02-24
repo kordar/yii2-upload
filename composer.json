@@ -1,5 +1,5 @@
 {
-    "name": "upload/kordar-upload",
+    "name": "kordar/upload",
     "description": "upload extension",
     "type": "yii2-extension",
     "keywords": ["yii2","extension"],
