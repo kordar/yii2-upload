@@ -90,14 +90,14 @@ class SingleUploadFile extends Action
             if ($this->model->file && $this->model->validate()) {
                 $fileName = $this->getPath(\Yii::$app->request->post('filename', ''));
                 if ($this->model->file->saveAs($fileName)) {
-                    return ['status' => 'success', 'path' => $fileName . '?' . time()];
+                    return ['status' => 200, 'path' => $fileName . '?' . time(), 'msg' => 'success'];
                 }
             } else {
                 $err = $this->model->getFirstErrors();
-                return ['status' => 'fail', 'msg' => $err['file']];
+                return ['status' => 201, 'msg' => $err['file'], 'path' => ''];
             }
         }
-        return ['status' => 'fail', 'msg' => \Yii::t('upload', 'Upload Fail')];
+        return ['status' => 202, 'msg' => \Yii::t('upload', 'Upload Fail'), 'path' => ''];
     }
 
     protected function setResponseFormat()
