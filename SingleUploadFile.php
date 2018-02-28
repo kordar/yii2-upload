@@ -8,6 +8,11 @@ use yii\web\UploadedFile;
 class SingleUploadFile extends Action
 {
     /**
+     * @var string
+     */
+    public $name = 'file';
+
+    /**
      * @var \kordar\upload\SingleUploadForm $model
      */
     protected $model;
@@ -47,11 +52,28 @@ class SingleUploadFile extends Action
      */
     public $autoSubDateRoot = '';    // 时间格式
 
+
+    public $successMessage = '';
+    public $errorMessage = '';
+
     public function beforeRun()
     {
         $this->setResponseFormat();
         $this->model = new SingleUploadForm();
         $this->model->rules[] = [['file'], 'file', 'extensions' => $this->extensions, 'maxSize' => $this->maxSize];
+
+        if (empty($this->successMessage)) {
+            $this->successMessage = function($filename) {
+                return ['status' => 200, 'path' => $filename . '?' . time(), 'msg' => 'success'];
+            };
+        }
+
+        if (empty($this->errorMessage)) {
+            $this->errorMessage = function ($msg) {
+                return ['status' => 201, 'msg' => $msg ? : 'error', 'path' => ''];
+            };
+        }
+
         return true;
     }
 
@@ -86,18 +108,18 @@ class SingleUploadFile extends Action
     public function run()
     {
         if (\Yii::$app->request->isPost) {
-            $this->model->file = UploadedFile::getInstance($this->model, 'file');
+            $this->model->file = UploadedFile::getInstanceByName($this->name);
             if ($this->model->file && $this->model->validate()) {
                 $fileName = $this->getPath(\Yii::$app->request->post('filename', ''));
                 if ($this->model->file->saveAs($fileName)) {
-                    return ['status' => 200, 'path' => $fileName . '?' . time(), 'msg' => 'success'];
+                    return call_user_func($this->successMessage, $fileName);
                 }
             } else {
                 $err = $this->model->getFirstErrors();
-                return ['status' => 201, 'msg' => $err['file'], 'path' => ''];
+                return call_user_func($this->errorMessage, $err['file']);
             }
         }
-        return ['status' => 202, 'msg' => \Yii::t('upload', 'Upload Fail'), 'path' => ''];
+        return call_user_func($this->errorMessage, \Yii::t('upload', 'Upload Fail'));
     }
 
     protected function setResponseFormat()
@@ -105,5 +127,4 @@ class SingleUploadFile extends Action
         $response = \Yii::$app->response;
         $response->format = \yii\web\Response::FORMAT_JSON;
     }
-
 }
