@@ -1,7 +1,6 @@
 <?php
 namespace kordar\upload;
 
-use kordar\upload\UploadHelper;
 use yii\base\Action;
 use yii\web\UploadedFile;
 

@@ -11,7 +11,7 @@
         }
     ],
     "require": {
-        "yiisoft/yii2": "*"
+        "cloudmario/scs": "*"
     },
     "autoload": {
         "psr-4": {
