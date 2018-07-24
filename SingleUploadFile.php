@@ -31,7 +31,7 @@ class SingleUploadFile extends Action
      * The maximum size of the file to be uploaded.
      * eg. 1024*1024
      */
-    public $maxSize = 1024 * 1024;
+    public $maxSize = 1048576; // 1024 * 1024
 
     /**
      * @var string
