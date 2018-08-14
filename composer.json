@@ -11,7 +11,8 @@
         }
     ],
     "require": {
-        "cloudmario/scs": "*"
+        "cloudmario/scs": "*",
+        "aliyuncs/oss-sdk-php": "~2.x.x"
     },
     "autoload": {
         "psr-4": {
