@@ -29,7 +29,7 @@ class AliYunOss extends SingleUploadFile
                 try {
                     $oss = OssHelper::getOssInstance();
                     if ($oss->uploadFile($this->bucket, $fileName, $this->model->file->tempName)) {
-                        return call_user_func($this->successMessage, $this->host . '/' . $fileName);
+                        return call_user_func($this->successMessage, $this->host . $fileName);
                     }
                 } catch (OssException $e) {
                     return call_user_func($this->errorMessage, $e->getMessage());
